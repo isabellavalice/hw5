@@ -187,6 +187,16 @@ class CsvReader(FileReader):
         For example, this method should return a list like: 
         [('10/5', 5), ('11/4', 3), ('5/23', 2)]
         """
+        common_release = {}
+        for i in self.data_dict["Release Date"]:
+            date = "/".join(i.split("/")[:2])
+            common_release[date] = common_release.get(date, 0) + 1
+        same_release = {}
+        for dates in common_release:
+            if common_release[dates] >= 2:
+                same_release[dates] = common_release[dates]
+                
+        return sorted(same_release.items(), key = lambda x: x[1], reverse = True)
 
 
 ##############################################################################
@@ -272,15 +282,23 @@ class TestHomework5(unittest.TestCase):
 
         ids = self.reader.get_movie_ID()
         for i in range(len(ids)):
-            self.assertEqual(self.reader.get_movie_ID()[i][:2], "tt")
-            self.assertEqual(len(self.reader.get_movie_ID()[i]), 9)
-        pass
+            self.assertEqual(ids[i][:2], "tt")
+            self.assertEqual(len(ids[i]), 9)
+        
 
     ###########################################################################
     # If you are doing the extra credit, write your new test case below.
     ###########################################################################
 
-
+    def test_find_common_release_dates(self):
+        list_tups = self.reader.find_common_release_dates()
+        prev_num = list_tups[0][1]
+        for (date, num_common) in list_tups:
+            self.assertTrue(num_common >= 2)
+            self.assertTrue(prev_num >= num_common)
+            prev_num = num_common
+        
+            
 
     
 # The main() function runs the above test cases
